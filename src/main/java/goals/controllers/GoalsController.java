@@ -53,14 +53,16 @@ public class GoalsController {
 	List<Goal> goals;
 	IdGenerator idGenerator;
 	
+	@Autowired
+	private GoalRepository goalRepository;
 	
-	private GoalRepository goalsRepository;
 	private ActiveGoalsQueueRepository activeGoalsQueueRepository;
 	
 
-	public GoalsController(GoalRepository goalsRepository, ActiveGoalsQueueRepository activeGoalsQueueRepository) {
-		this.goalsRepository = goalsRepository;
+	public GoalsController(GoalRepository goalRepository, ActiveGoalsQueueRepository activeGoalsQueueRepository) {
+		this.goalRepository = goalRepository;
 		this.activeGoalsQueueRepository = activeGoalsQueueRepository;
+
 //		this.goals = new ArrayList<Goals>();
 //		this.idGenerator = new IdGenerator();
 //		
@@ -85,19 +87,19 @@ public class GoalsController {
 		if(state !=null) {
 			switch(state) {
 				case "waiting":
-					return this.goalsRepository.findGoalsByPhase(state);
+					return this.goalRepository.findGoalsByPhase(state);
 				case "active":
-					return this.goalsRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
+					return this.goalRepository.findGoalsByPhaseIsNotNullAndPhaseNotLike("waiting");
 				case "inbox":
-					return this.goalsRepository.findGoalsByPhaseIsNull();
+					return this.goalRepository.findGoalsByPhaseIsNotNullAndParentidIsNull();
 				case "daily":
-					return this.goalsRepository.findGoalsByIsDailyIsTrue();
+					return this.goalRepository.findGoalsByIsDailyIsTrue();
 				default:
-					return this.goalsRepository.findAll();			
+					return this.goalRepository.findAll();			
 			}
 		}
 		else {
-			return this.goalsRepository.findAll();
+			return this.goalRepository.findAll();
 		}
 
 	}
@@ -134,20 +136,21 @@ public class GoalsController {
 	
 	@PostMapping("/goals")
 	public List<Goal> AddGoal(@RequestBody Goal newGoal) {
-		this.goalsRepository.save(newGoal);
+		newGoal.setPhase("inbox");
+		this.goalRepository.save(newGoal);
 		
 		//return this.goalRepository.findGoalsByParentid(0);
-		return this.goalsRepository.findAll();
+		return this.goalRepository.findAll();
 	}
 	
 	@GetMapping("/goals/{id}")
 	public Optional<Goal> getGoalById(@PathVariable(value="id") int id){
-		return this.goalsRepository.findById(id);
+		return this.goalRepository.findById(id);
 	}
 		
 	@PutMapping("/goals/{id}")
 	public List<Goal> updateGoalById(@PathVariable(value="id") int id, @RequestBody Goal goals){
-		Goal updatedGoal =  this.goalsRepository.findById(id).get();
+		Goal updatedGoal =  this.goalRepository.findById(id).get();
 		
 		if (goals.getTitle() != null){
 			updatedGoal.setTitle(goals.getTitle());
@@ -183,17 +186,20 @@ public class GoalsController {
 			updatedGoal.setIsDaily(goals.getIsDaily());
 		}
 		
-		this.goalsRepository.save(updatedGoal);
+		this.goalRepository.save(updatedGoal);
 		
-		return this.goalsRepository.findAll();
+		return this.goalRepository.findAll();
 	}
 	
 	@DeleteMapping("/goals/{id}")
-	public List<Goal> deleteGoalById(@PathVariable(value="id") int id){
+	public Goal deleteGoalById(@PathVariable(value="id") int id){
 		
-		this.goalsRepository.deleteById(id);
+		Goal goalToBeDeleted = new Goal();
+		goalToBeDeleted.setTitle(this.goalRepository.findById(id).get().getTitle());
+		this.goalRepository.deleteById(id);
 		
-		return this.goalsRepository.findAll();
+		System.out.println(goalToBeDeleted);
+		return goalToBeDeleted;
 	}
 	
 //	@RequestMapping(value="/gosho", method=RequestMethod.GET)
