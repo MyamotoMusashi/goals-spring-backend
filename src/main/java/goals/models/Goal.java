@@ -10,70 +10,56 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.FetchMode;
+import org.hibernate.annotations.Fetch;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 
-@Entity(name="goal")
+@Entity(name="goal_entity")
 @JsonIgnoreProperties 
 public class Goal {
 		
 	@Id
 	@GeneratedValue
-	@Column(name="goal")
-
 	private int id;
 	
-	@Column(name="goal_title")
 	private String title;
 	
-	@Column(name="goal_description")
 	private String description;
 	
-	@Column(name="goal_parentGoal")
 	private Integer parentid;
 	
-	@Column(name="goal_dueDate")
 	private String dueDate;
 	
-	@Column(name="goal_estimatedWork")
 	private int estimatedWork;
 	
-	@Column(name="goal_remainingWork")
 	private int remainingWork;
 	
-	@Column(name="goal_progress")
 	private String progress;
 	
-	@Column(name="goal_justification")
 	private String justification;
 	
-	@Column(name="goal_phase")
 	private String phase;
 	
-	@Column(name="goal_isCompleted")
 	private Boolean isCompleted;
 	
-	@Column(name="goal_isReoccuring")
 	private Boolean isReoccuring;
 	
-	@Column(name="goal_priority")
 	private int priority;
 	
-	@Column(name="goal_idealOutcome")
 	private String idealOutcome;
 	
-	@Column(name="goal_scope")
 	private String scope;
 	
-	@Column(name="goal_blockingReason")
 	private String blockingReason;
 	
-	@Column(name="goal_replacement")
 	private String replacement;
 	
-	@Column(name="goal_isDaily")
 	private Boolean isDaily;
+	
 	
 	@OneToMany(mappedBy="parentid")
 	private List<Goal> children;
